@@ -1,0 +1,4 @@
+.idea/
+*.so
+composer.lock
+vendor/
