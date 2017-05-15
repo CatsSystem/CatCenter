@@ -18,9 +18,15 @@
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
 
-namespace app\ctrl\home;
 
-class Config
+namespace base\framework;
+
+
+interface IController
 {
+    public function before();
 
+    public function success($data);
+
+    public function error($code, $msg = '');
 }

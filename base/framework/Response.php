@@ -18,9 +18,50 @@
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
 
-namespace app\ctrl\home;
 
-class Config
+namespace base\framework;
+
+
+class Response
 {
 
+    /**
+     * @var \swoole_http_response
+     */
+    private $response;
+
+    private $header;
+
+    private $cookie;
+
+    public function __construct($response)
+    {
+        $this->response = $response;
+    }
+
+    public function end()
+    {
+
+    }
+
+    public function gzip()
+    {
+
+    }
+
+    /**
+     * @param mixed $header
+     */
+    public function setHeader($header)
+    {
+        $this->header = $header;
+    }
+
+    /**
+     * @param mixed $cookie
+     */
+    public function setCookie($cookie)
+    {
+        $this->cookie = $cookie;
+    }
 }
