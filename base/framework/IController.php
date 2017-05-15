@@ -24,7 +24,7 @@ namespace base\framework;
 
 interface IController
 {
-    public function before();
+    public function before(Request $request, Response $response);
 
     public function success($data);
 

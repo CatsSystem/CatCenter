@@ -22,5 +22,5 @@ namespace app\ctrl\home;
 
 class Config
 {
-
+    
 }

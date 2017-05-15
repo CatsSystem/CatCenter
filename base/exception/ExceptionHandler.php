@@ -18,13 +18,19 @@
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
 
-namespace app\common;
 
-class Error extends \core\common\Error
+namespace base\exception;
+
+
+class ExceptionHandler
 {
-    const ERR_ETCD_REQUEST_FAILED = -1001;
+    public static function exceptionHandler($exception, $trace = true)
+    {
 
+    }
 
-    const ERR_HTTP_REQUEST_FAILED = -2001;
+    public static function FatalHandler($fatal, $trace = true)
+    {
 
+    }
 }

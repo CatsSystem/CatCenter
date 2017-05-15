@@ -39,14 +39,19 @@ class Response
         $this->response = $response;
     }
 
-    public function end()
+    public function status($code = 200)
     {
-
+        $this->response->status($code);
     }
 
-    public function gzip()
+    public function end($data = '')
     {
+        $this->response->end($data);
+    }
 
+    public function gzip($level = 5)
+    {
+        $this->response->gzip($level);
     }
 
     /**

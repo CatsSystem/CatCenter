@@ -18,13 +18,51 @@
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
 
-namespace app\common;
+namespace app\ctrl;
 
-class Error extends \core\common\Error
+use app\common\Error;
+use base\framework\IController;
+use base\framework\Request;
+use base\framework\Response;
+
+class Base implements IController
 {
-    const ERR_ETCD_REQUEST_FAILED = -1001;
+    /**
+     * @var Request
+     */
+    protected $request;
 
+    /**
+     * @var Response
+     */
+    protected $response;
 
-    const ERR_HTTP_REQUEST_FAILED = -2001;
+    /**
+     * @var array
+     */
+    protected $params;
 
+    public function before(Request $request, Response $response)
+    {
+        $this->request = $request;
+        $this->response = $response;
+        $this->params = $request->getParams();
+        return true;
+    }
+
+    public function success($data)
+    {
+        return [
+            'code' => Error::SUCCESS,
+            'data' => $data
+        ];
+    }
+
+    public function error($code, $msg = 'request failed.')
+    {
+        return [
+            'code'  => $code,
+            'error' => $msg
+        ];
+    }
 }
