@@ -20,6 +20,7 @@
 
 namespace base\framework;
 
+use base\middleware\MiddleWareManager;
 use core\component\config\Config;
 
 class Route
@@ -32,6 +33,15 @@ class Route
     public static function route(Request $request, Response $response)
     {
         try {
+            foreach (MiddleWareManager::getInstance() as $middleware)
+            {
+                $result = yield $middleware->doInvoke($request, $response);
+                if($result !== true)
+                {
+                    return $result;
+                }
+            }
+
             $action = Config::getField('project','ctrl_path', 'api') . '\\' . $request->getModule() . '\\' . $request->getCtrl();
             if (!\class_exists($action)) {
                 throw new \Exception("no class {$action}");

@@ -17,4 +17,57 @@
  *******************************************************************************
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
- 
+
+namespace app\ctrl\home;
+
+use app\ctrl\Base;
+use base\etcd\KVClient;
+use core\component\config\Config;
+
+class Node extends Base
+{
+    private $etcd_server;
+
+    public function __construct()
+    {
+        $this->etcd_server = Config::getField('etcd', 'hostname');
+    }
+
+    public function getList()
+    {
+        $result = KVClient::getInstance($this->etcd_server)->all();
+        if(is_int($result))
+        {
+            return $this->error($result, '获取列表失败');
+        }
+
+        return $this->success($result);
+    }
+
+    public function getDetail()
+    {
+        $id = $this->params['id'];
+        $result = KVClient::getInstance($this->etcd_server)->get($id);
+        if(is_int($result))
+        {
+            return $this->error($result, '获取详情失败');
+        }
+
+        return $this->success($result);
+    }
+
+    public function saveConfig()
+    {
+        $id = $this->params['id'];
+        $config = $this->params['config'];
+
+        $key = "Config_" . $id;
+        $result = KVClient::getInstance($this->etcd_server)->put($key, $config);
+        if(is_int($result))
+        {
+            return $this->error($result, '保存失败');
+        }
+
+        return $this->success();
+    }
+}

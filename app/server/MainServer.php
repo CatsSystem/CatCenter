@@ -24,6 +24,7 @@ class MainServer
 {
     public function onRequest(\swoole_http_request $request, \swoole_http_response $response)
     {
+        $path_info = $request->server['path_info'];
 
     }
 

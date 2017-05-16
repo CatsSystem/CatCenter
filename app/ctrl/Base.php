@@ -50,7 +50,7 @@ class Base implements IController
         return true;
     }
 
-    public function success($data)
+    public function success($data = [])
     {
         return [
             'code' => Error::SUCCESS,
