@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package app.service;
+package Proto.Message;
 
 message Service
 {
@@ -49,12 +49,23 @@ message StatusResponse
     ResponseHeader  header  = 1;
 }
 
-message GetAddressRequest
+message LoadConfigRequest
+{
+    uint64          id      = 1;
+}
+
+message LoadConfigResponse
+{
+    ResponseHeader  header  = 1;
+    string          config  = 2;
+}
+
+message GetEtcdAddressRequest
 {
 
 }
 
-message GetAddressResponse
+message GetEtcdAddressResponse
 {
     ResponseHeader  header      = 1;
     string          address     = 2;
@@ -113,31 +124,4 @@ message LogRequest
 message StatResponse
 {
 
-}
-
-service Node
-{
-    rpc Online(OnlineRequest) returns (OnlineResponse) {}
-
-    rpc Offline(OfflineRequest) returns (OfflineResponse) {}
-
-    rpc Status(StatusRequest) returns (StatusResponse) {}
-}
-
-service Center
-{
-    rpc GetEtcdAddress(GetAddressRequest) returns (GetAddressResponse) {}
-
-    rpc GetService(GetServiceRequest) returns (GetServiceResponse) {}
-
-    rpc ListService(ListServiceRequest) returns (ListServiceResponse) {}
-}
-
-service Stat
-{
-    rpc Upload(stream GetServiceRequest) returns(stream StatResponse) {}
-
-    rpc Access(stream AccessRequest) returns(stream StatResponse) {}
-
-    rpc Log(stream LogRequest) returns(stream StatResponse) {}
 }

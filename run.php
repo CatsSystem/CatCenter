@@ -1,10 +1,26 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: lidanyang
- * Date: 16/12/2
- * Time: 上午11:13
- */
+/*******************************************************************************
+ *  This file is part of swoole-grpc.
+ *
+ *  swoole-grpc is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  swoole-grpc is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************
+ * Author: Lidanyang  <simonarthur2012@gmail.com>
+ ******************************************************************************/
+
+use base\Entrance;
+
+require_once __DIR__ . "/vendor/autoload.php";
 
 function usage()
 {
@@ -25,15 +41,19 @@ if( isset($argv[2]) &&  $argv[2] == '-c' ) {
     $debug = "debug";
 }
 
-$config = include "config/{$debug}/config.php";
-$pid_path = $config['project']['pid_path'] . '/' . $config['project']['project_name'] . '_master.pid';
-$manager_pid_path = $config['project']['pid_path'] . '/' . $config['project']['project_name'] . '_manager.pid';
+\core\component\config\Config::load(__DIR__ . "/config/{$debug}/");
+
+$config = \core\component\config\Config::get('project');
+
+$pid_path = $config['pid_path'] . '/' . $config['project_name'] . '_master.pid';
+$manager_pid_path = $config['pid_path'] . '/' . $config['project_name'] . '_manager.pid';
 
 switch($cmd)
 {
     case 'start':
     {
-        require_once 'main.php';
+
+        Entrance::run();
         break;
     }
     case 'restart':
@@ -43,7 +63,8 @@ switch($cmd)
         shell_exec("kill -15 `cat {$pid_path}`");
         echo "restarting...\n";
         sleep(3);
-        require_once 'main.php';
+
+        Entrance::run();
         break;
     }
     case 'stop':
@@ -59,4 +80,3 @@ switch($cmd)
         break;
     }
 }
-

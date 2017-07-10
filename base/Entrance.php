@@ -13,12 +13,12 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
 
-namespace grpc;
+namespace base;
 
 use core\component\config\Config;
 use core\server\IServer;
@@ -26,8 +26,11 @@ use core\server\SwooleServer;
 
 class Entrance
 {
+    public static $rootPath;
+
     public static function run()
     {
+        self::$rootPath = dirname(__DIR__);
         $server = new SwooleServer(Config::get('server'));
 
         $main_server_class = Config::getField('project', 'main_server');

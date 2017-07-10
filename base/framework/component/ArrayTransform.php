@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Utils;
+namespace base\framework\component;
+use Google\Protobuf\Internal\MapField;
+use Google\Protobuf\Internal\RepeatedField;
 
 /**
  * Created by PhpStorm.
@@ -43,10 +45,10 @@ class ArrayTransform {
 
 		foreach ($array as $key => $item) {
 			if (is_object($item)) {
-				if($item instanceof \Google\Protobuf\Internal\RepeatedField){
+				if($item instanceof RepeatedField || $item instanceof MapField){
 					$tmp = [];
-					foreach ($item as $v){
-						$tmp[] = $v;
+					foreach ($item as $k=>$v){
+						$tmp[$k] = $v;
 					}
 					$array[$key] = $tmp;
 				}else{
@@ -90,15 +92,20 @@ class ArrayTransform {
 
 	private function getToObjectItem($item, $keyName = '') {
 		if (is_array($item)) {
+			$isArr = FALSE;
 			foreach ($item as $k => $value) {
 				if (is_numeric($k)) {
+					$isArr = TRUE;
+				}
+				break;
+			}
+			if($isArr){
+				foreach ($item as $k => $value) {
 					if (is_array($value)) {
 						$item[$k] = $this->getToObjectItem($value, $keyName);
 					}
-					return $item;
-				} else {
-					break;
 				}
+				return $item;
 			}
 			if (!isset($this->tree[$keyName])) {
 				throw new \Exception("not found [$keyName] class map");

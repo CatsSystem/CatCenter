@@ -13,7 +13,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
@@ -21,33 +21,35 @@
 namespace base\etcd;
 
 use app\common\Error;
+use core\component\config\Config;
 use core\concurrent\Promise;
+use Etcdserverpb\DeleteRangeRequest;
+use Etcdserverpb\DeleteRangeResponse;
 use Etcdserverpb\PutRequest;
 use Etcdserverpb\RangeRequest;
 use Etcdserverpb\RangeResponse;
 
 class KVClient
 {
-    private static $instance = [];
+    private static $instance;
 
     /**
-     * @param $hostname
      * @return KVClient
      */
-    public static function getInstance($hostname)
+    public static function getInstance()
     {
-        if(!isset(KVClient::$instance[$hostname])
-            || KVClient::$instance[$hostname] == null)
+        if(self::$instance == null)
         {
-            KVClient::$instance[$hostname] = new KVClient($hostname);
+            self::$instance = new KVClient();
         }
 
-        return KVClient::$instance[$hostname];
+        return KVClient::$instance;
     }
 
-    public function __construct($hostname)
+    public function __construct()
     {
-        $this->hostname = $hostname;
+        $this->hostname = Config::getField('etcd', 'hostname');
+        $this->connect();
     }
 
     /**
@@ -73,6 +75,7 @@ class KVClient
             if($status != 200)
             {
                 $promise->resolve(Error::ERR_ETCD_REQUEST_FAILED);
+                return;
             }
             $promise->resolve(Error::SUCCESS);
         });
@@ -89,15 +92,18 @@ class KVClient
             if(!$response instanceof RangeResponse)
             {
                 $promise->resolve(Error::ERR_ETCD_REQUEST_FAILED);
+                return;
             }
             if($status != 200)
             {
                 $promise->resolve(Error::ERR_ETCD_REQUEST_FAILED);
+                return;
             }
             $list = $response->getKvs();
             if($response->getCount() == 0)
             {
                 $promise->resolve(Error::ERR_ETCD_REQUEST_FAILED);
+                return;
             }
             foreach ($list as $item)
             {
@@ -119,6 +125,7 @@ class KVClient
             if($status != 200)
             {
                 $promise->resolve(Error::ERR_ETCD_REQUEST_FAILED);
+                return;
             }
             $list = $response->getKvs();
             $items = [];
@@ -142,6 +149,7 @@ class KVClient
             if($status != 200)
             {
                 $promise->resolve(Error::ERR_ETCD_REQUEST_FAILED);
+                return;
             }
             $list = $response->getKvs();
             $items = [];
@@ -169,6 +177,7 @@ class KVClient
             if($status != 200)
             {
                 $promise->resolve(Error::ERR_ETCD_REQUEST_FAILED);
+                return;
             }
             $list = $response->getKvs();
             $items = [];
@@ -177,6 +186,33 @@ class KVClient
                 $items[$item->getKey()] = $item->getValue();
             }
             $promise->resolve($items);
+        });
+        return $promise;
+    }
+
+    public function del($key)
+    {
+        $promise = new Promise();
+        $request = new DeleteRangeRequest();
+        $request->setKey($key);
+        $this->client->DeleteRange($request)->wait(function($result) use ($promise){
+            list($response, $status) = $result;
+            if(!$response instanceof DeleteRangeResponse)
+            {
+                $promise->resolve(Error::ERR_ETCD_REQUEST_FAILED);
+                return;
+            }
+            if($status != 200)
+            {
+                $promise->resolve(Error::ERR_ETCD_REQUEST_FAILED);
+                return;
+            }
+            if(($deleted = $response->getDeleted()) == 0)
+            {
+                $promise->resolve(Error::ERR_ETCD_REQUEST_FAILED);
+                return;
+            }
+            $promise->resolve($deleted);
         });
         return $promise;
     }

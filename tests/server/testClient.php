@@ -13,8 +13,22 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
- 
+
+use etcd\KVClient;
+use Etcdserverpb\PutRequest;
+
+require_once __DIR__ . '/../../vendor/autoload.php';
+
+$client = new KVClient('127.0.0.1:9501', [], function(){
+    echo "client closed\n";
+});
+
+$request = new PutRequest();
+$request->setKey("Hello");
+$request->setValue("test");
+$request->setPrevKv(true);
+$call = $client->Put($request);

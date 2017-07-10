@@ -13,7 +13,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
@@ -23,32 +23,21 @@ require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../rpc_grpc_pb.php';
 
-use App\Message\OnlineRequest;
-use App\Message\Service;
+use App\Message\GetServiceRequest;
+use App\Service\CenterClient;
 
-$client = new \App\Service\NodeClient("0.0.0.0:8340", [
+$client = new CenterClient("0.0.0.0:8340", [
     'credentials' => \Grpc\ChannelCredentials::createInsecure(),
 ]);
 
-$request = new OnlineRequest();
-$service = new Service();
-$service->setName("TestService");
-$service->setType(1);
-$service->setHost("127.0.0.1");
-$service->setPort("9510");
-$service->setExtra(json_encode([
-    'socket_type' => 'tcp'
-]));
-$request->setService($service);
+$request = new GetServiceRequest();
+$request->setId(6278865498641793024);
 
-list($reply, $status) = $client->Online($request)->wait();
+list($reply, $status) = $client->GetService($request)->wait();
 
-if($reply instanceof \App\Message\OnlineResponse)
+if($reply instanceof \App\Message\GetServiceResponse)
 {
-    var_dump($reply);
-    var_dump($reply->getHeader()->getStatus());
-    var_dump($reply->getHeader()->getError());
-    var_dump($reply->getId());
+    var_dump($reply->getService());
 }
 
 

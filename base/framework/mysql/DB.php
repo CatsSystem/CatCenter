@@ -87,7 +87,6 @@ class DB {
     public function connect($config='', $autoConnection=false) {
         if (empty($this->linkID)) {
             if(empty($config))  $config =   $this->config;
-            var_dump($config);
             try{
                 if(empty($config['dsn'])) {
                     $config['dsn']  =   $this->parseDsn($config);
@@ -1126,7 +1125,6 @@ class DB {
     protected function initConnect() {
         if ( !$this->linkID ) {
             $this->linkID = $this->connect();
-            var_dump($this->linkID);
         }
         try {
             $this->linkID->getAttribute(\PDO::ATTR_SERVER_INFO);

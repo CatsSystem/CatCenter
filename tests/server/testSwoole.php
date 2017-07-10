@@ -24,32 +24,37 @@ class Test
     {
         $server = new swoole_http_server("0.0.0.0", 9502);
         $server->set([
-            'worker_num' => 1
+            'worker_num' => 1,
+            'max_request' => 10000
         ]);
         $server->on("workerstart", function(){
-            $this->connect();
+            $this->connect(function(){});
         });
         $server->on("request", function($request, $res){
             $this->count --;
             if($this->count <= 0)
             {
                 $this->client->close();
-                $this->connect();
+                $this->connect(function () use ($res){
+                    $this->client->post("/test", "hello", 3, function($client, $response) use ($res){
+                        $res->end($response->body);
+                    });
+                });
+
+            } else {
+                $this->client->post("/test", "hello", 3, function($client, $response) use ($res){
+                    $res->end($response->body);
+                });
             }
-            $this->client->post("/test", "hello", 3, function($client, $response) use ($res){
-                $res->end($response->body);
-            });
         });
         $server->start();
     }
 
-    public function connect()
+    public function connect($callback)
     {
         $this->client = new http2_client("127.0.0.1", 9501, false);
         $this->count = 1000;
-        $this->client->connect(1, function($client, $errCode) {
-
-        });
+        $this->client->connect(1, $callback);
     }
 
 }

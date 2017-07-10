@@ -13,7 +13,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
@@ -62,6 +62,7 @@ class Node extends Base
         $config = $this->params['config'];
 
         $key = "Config_" . $id;
+        $config = \swoole_serialize::pack($config);
         $result = KVClient::getInstance($this->etcd_server)->put($key, $config);
         if(is_int($result))
         {

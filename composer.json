@@ -8,15 +8,18 @@
         }
     ],
     "require": {
-        "php": ">=5.5",
-        "ext-swoole": ">=1.9.9",
-        "cat-sys/cat-core": "v0.1.0",
-        "cat-sys/swoole-etcd": "^0.1.0",
-        "hprose/hprose-swoole": "dev-master"
+        "php": ">=7",
+        "ext-swoole": ">=1.9.14",
+        "cat-sys/cat-core": "dev-master",
+        "ext-protobuf": "^3.3.2",
+        "ext-http2_client": "^0.0.1"
     },
     "autoload": {
         "psr-4": {
-            "center\\":"base/"
+            "app\\":"app/",
+            "Proto\\":"Proto/",
+            "base\\":"base/",
+            "GPBMetadata\\":"GPBMetadata/"
         }
     }
 }

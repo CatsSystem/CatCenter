@@ -18,7 +18,7 @@
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
 
-namespace app\service;
+namespace base\framework\service;
 
 use Proto\Message\ResponseHeader;
 

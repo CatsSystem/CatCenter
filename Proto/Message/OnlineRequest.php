@@ -24,7 +24,7 @@ class OnlineRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * <code>.Proto.Message.Service service = 1;</code>
+     * @return Service
      */
     public function getService()
     {

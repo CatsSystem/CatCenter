@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+import "message.proto";
+
+package Proto.Service;
+
+service Node
+{
+    rpc Online(Message.OnlineRequest) returns (Message.OnlineResponse) {}
+
+    rpc Offline(Message.OfflineRequest) returns (Message.OfflineResponse) {}
+
+    rpc Status(Message.StatusRequest) returns (Message.StatusResponse) {}
+
+    rpc LoadConfig(Message.LoadConfigRequest) returns (Message.LoadConfigResponse) {}
+}
+
+service Center
+{
+    rpc GetEtcdAddress(Message.GetEtcdAddressRequest) returns (Message.GetEtcdAddressResponse) {}
+
+    rpc GetService(Message.GetServiceRequest) returns (Message.GetServiceResponse) {}
+
+    rpc ListService(Message.ListServiceRequest) returns (Message.ListServiceResponse) {}
+}
+
+service Stat
+{
+    rpc Upload(Message.GetServiceRequest) returns(Message.StatResponse) {}
+
+    rpc Access(Message.AccessRequest) returns(Message.StatResponse) {}
+
+    rpc Log(Message.LogRequest) returns(Message.StatResponse) {}
+}

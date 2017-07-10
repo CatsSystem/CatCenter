@@ -2,3 +2,5 @@
 *.so
 composer.lock
 vendor/
+*.pid
+*.log

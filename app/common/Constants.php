@@ -13,7 +13,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
@@ -25,4 +25,9 @@ namespace app\common;
 class Constants extends \core\common\Constants
 {
     const NODE_PREFIX = "Node_";
+    const CONFIG_PREFIX = "Config_";
+    const SERVICE_ID_LIST = "Service_ID_List";
+
+    const SERVICE_OFFLINE   = 0;
+    const SERVICE_ONLINE    = 1;
 }

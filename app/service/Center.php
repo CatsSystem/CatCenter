@@ -13,27 +13,28 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
 
 namespace app\service;
 
-use app\common\Constants;
 use app\common\Error;
-use app\common\Utils;
-use App\Message\OfflineRequest;
-use App\Message\OfflineResponse;
-use App\Message\OnlineRequest;
-use App\Message\OnlineResponse;
-use App\Message\StatusRequest;
-use App\Message\StatusResponse;
-use base\etcd\KVClient;
+use base\framework\service\BaseService;
+use core\component\config\Config;
+use Proto\Message\GetEtcdAddressRequest;
+use Proto\Message\GetEtcdAddressResponse;
+use Proto\Message\GetServiceRequest;
+use Proto\Message\GetServiceResponse;
+use Proto\Message\ListServiceRequest;
+use Proto\Message\ListServiceResponse;
+use Proto\Message\Service;
+use Proto\Service\CenterService;
 
-class Node extends BaseService
+class Center extends CenterService
 {
-
+    use BaseService;
 
     /**
      * @param string $method 请求方法
@@ -52,57 +53,53 @@ class Node extends BaseService
         return $request;
     }
 
-    public function Online(OnlineRequest $request)
+    public function GetEtcdAddress(GetEtcdAddressRequest $request)
     {
-        $response = new OnlineResponse();
-        $service = $request->getService();
-
-        $service_id = Utils::grantNodeId();
-        $info['name']           = $service->getName();
-        $info['type']           = $service->getType();
-        $info['host']           = $service->getHost();
-        $info['port']           = $service->getPort();
-        $info['extra']          = $service->getExtra();
-
-        $result = yield KVClient::getInstance()->put($service_id,
-            \swoole_serialize::pack($info));
-        if($result != Error::SUCCESS)
-        {
-            $status = 500;
-            $error = "保存失败";
-            goto error;
-        }
-        $response->setId($service_id);
+        $response = new GetEtcdAddressResponse();
         $response->setHeader($this->getHeader(200));
-        return $response;
-
-        error:
-        $response->setHeader($this->getHeader($status, $error));
+        $response->setAddress(Config::getField('etcd', 'hostname'));
         return $response;
     }
 
-    public function Offline(OfflineRequest $request)
+    public function GetService(GetServiceRequest $request)
     {
-        $response = new OfflineResponse();
+        $response = new GetServiceResponse();
         $service_id = $request->getId();
-        $result = yield KVClient::getInstance()->del($service_id);
-        if($result != Error::SUCCESS)
+
+        $result = yield $this->redis_pool->pop()->HGETALL($service_id);
+        if($result['code'] != Error::SUCCESS)
         {
             $status = 500;
-            $error = "保存失败";
+            $error = "获取失败";
             goto error;
         }
-        $response->setHeader($this->getHeader(200));
+
+        $info = [];
+        $len = count($result['data']);
+        for($i = 0; $i < $len; $i += 2)
+        {
+            $info[$result['data'][$i]] = $result['data'][$i + 1];
+        }
+        $service = new Service();
+        $service->setName($info['name']);
+        $service->setType($info['type']);
+        $service->setHost($info['host']);
+        $service->setPort($info['port']);
+        $service->setExtra($info['extra']);
+        $header = $this->getHeader(200);
+        $response->setHeader($header);
+        $response->setService($service);
         return $response;
 
         error:
-        $response->setHeader($this->getHeader($status, $error));
+        $header = $this->getHeader($status, $error);
+        $response->setHeader($header);
         return $response;
     }
 
-    public function Status(StatusRequest $request)
+    public function ListService(ListServiceRequest $request)
     {
-        $response   = new StatusResponse();
+        $response   = new ListServiceResponse();
         $service_id = $request->getId();
         $status     = $request->getStatus();
     }

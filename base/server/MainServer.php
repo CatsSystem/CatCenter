@@ -65,7 +65,9 @@ class MainServer extends HttpServer
         $uri = $request->server['request_uri'];
         $uris = explode("/", $uri);
 
-        $class = str_replace("." , '\\', $uris[1]) . 'Service';
+        $class = str_replace("." , '\\', $uris[1]);
+        $routes = Config::get('route');
+        $class  = $routes[$class]??'';
         $method = "run" . $uris[2];
 
         $rawContent = $data = substr($request->rawContent(), 5);
