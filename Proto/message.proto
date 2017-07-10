@@ -1,0 +1,143 @@
+syntax = "proto3";
+
+package app.service;
+
+message Service
+{
+    string  name    = 1;
+    string  host    = 2;
+    uint32  port    = 3;
+    uint32  type    = 4;
+    string  extra   = 5;
+}
+
+message ResponseHeader
+{
+    uint32  status  = 1;
+    string  error   = 2;
+}
+
+message OnlineRequest
+{
+    Service service = 1;
+}
+
+message OnlineResponse
+{
+    ResponseHeader  header  = 1;
+    uint64          id      = 2;
+}
+
+message OfflineRequest
+{
+     uint64          id      = 1;
+}
+
+message OfflineResponse
+{
+    ResponseHeader  header  = 1;
+}
+
+message StatusRequest
+{
+    uint64          id      = 1;
+    uint32          status  = 2;
+}
+
+message StatusResponse
+{
+    ResponseHeader  header  = 1;
+}
+
+message GetAddressRequest
+{
+
+}
+
+message GetAddressResponse
+{
+    ResponseHeader  header      = 1;
+    string          address     = 2;
+}
+
+message GetServiceRequest
+{
+     uint64          id      = 1;
+}
+
+message GetServiceResponse
+{
+    ResponseHeader      header  = 1;
+    Service             service = 2;
+}
+
+message ListServiceRequest
+{
+    string  name    = 1;
+    string  host    = 2;
+    uint32  port    = 3;
+    uint32  type    = 4;
+}
+
+message ListServiceResponse
+{
+    ResponseHeader      header  = 1;
+    uint32              count   = 2;
+    repeated Service    list    = 3;
+}
+
+message UploadRequest
+{
+    uint64          id      = 1;
+    string          data    = 2;
+}
+
+message AccessRequest
+{
+    uint64          id      = 1;
+    string          method  = 2;
+    string          params  = 3;
+    uint32          snum    = 4;
+    uint32          fnum    = 5;
+    uint32          total   = 6;
+    uint32          cost_ms = 7;
+}
+
+message LogRequest
+{
+    uint64          id      = 1;
+    string          tag     = 2;
+    string          content = 3;
+}
+
+message StatResponse
+{
+
+}
+
+service Node
+{
+    rpc Online(OnlineRequest) returns (OnlineResponse) {}
+
+    rpc Offline(OfflineRequest) returns (OfflineResponse) {}
+
+    rpc Status(StatusRequest) returns (StatusResponse) {}
+}
+
+service Center
+{
+    rpc GetEtcdAddress(GetAddressRequest) returns (GetAddressResponse) {}
+
+    rpc GetService(GetServiceRequest) returns (GetServiceResponse) {}
+
+    rpc ListService(ListServiceRequest) returns (ListServiceResponse) {}
+}
+
+service Stat
+{
+    rpc Upload(stream GetServiceRequest) returns(stream StatResponse) {}
+
+    rpc Access(stream AccessRequest) returns(stream StatResponse) {}
+
+    rpc Log(stream LogRequest) returns(stream StatResponse) {}
+}
