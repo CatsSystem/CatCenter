@@ -18,14 +18,32 @@
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
 
-namespace app\common;
 
-class Error extends \core\common\Error
+namespace base\framework;
+
+
+class BaseController
 {
-    const ERR_ETCD_REQUEST_FAILED = -1001;
-    const ERR_HTTP_REQUEST_FAILED = -2001;
+    public function success(array $data = [])
+    {
+        return array_merge(
+            [
+                'header' => [
+                    'status'    => 200,
+                    'error'     => ''
+                ]
+            ],
+            $data
+        );
+    }
 
-    const ERR_UPDATE_SERVICE_FAILED = -10001;
-
-
+    public function error($status, $error = '')
+    {
+        return [
+            'header' => [
+                'status'    => $status,
+                'error'     => $error
+            ]
+        ];
+    }
 }

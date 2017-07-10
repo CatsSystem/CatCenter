@@ -1,9 +1,8 @@
-CURRENT_PATH=`pwd`
-PROJECT_PATH=$(dirname $(pwd))
+PROJECT_PATH=$(pwd)
 
-PROTO_PATH=$CURRENT_PATH
-PHP_OUT=$PROJECT_PATH
-GRPC_OUT=$PROJECT_PATH
+PROTO_PATH=$PROJECT_PATH/Service
+PHP_OUT=$PROJECT_PATH/Service
+GRPC_OUT=$PROJECT_PATH/Service
 
 GRPC_PLUGIN_PATH=/Users/lidanyang/Software/lib/grpc/bins/opt/grpc_php_plugin
 PROTOC_PATH=/usr/local/protobuf/bin/protoc

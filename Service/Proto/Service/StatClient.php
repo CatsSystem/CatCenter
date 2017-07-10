@@ -3,7 +3,7 @@
 
 namespace Proto\Service {
 
-  class StatClient extends \Grpc\BaseStub {
+  class StatClient extends \rpc\grpc\BaseStub {
 
     /**
      * @param string $hostname hostname

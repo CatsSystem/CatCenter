@@ -22,7 +22,6 @@ namespace app\service;
 
 use app\common\Constants;
 use app\common\Error;
-use app\common\Utils;
 use base\framework\mysql\Model;
 use base\framework\service\BaseService;
 use Proto\Message\LoadConfigRequest;
@@ -34,8 +33,8 @@ use Proto\Message\OnlineResponse;
 use Proto\Message\StatusRequest;
 use Proto\Message\StatusResponse;
 use base\etcd\KVClient;
-use core\model\MySQLStatement;
 use Proto\Service\NodeService;
+use Utils\GrpcTransform;
 
 class Node extends NodeService
 {
@@ -43,73 +42,22 @@ class Node extends NodeService
 
     public function Online(OnlineRequest $request)
     {
-        $response = new OnlineResponse();
-        $service = $request->getService();
-
-        $service_key = sprintf("%s:%s:%s",
-            $service->getHost(),
-            $service->getPort(),
-            $service->getName());
-        $result = Model::D("service_table")
-            ->field("service_id")
-            ->where([
-                'service_key' => $service_key
-            ])
-            ->find();
-        if(empty($result))
-        {
-            $service_id         = Utils::grantNodeId();
-            $service_info = [
-                'service_id'    => $service_id,
-                'service_key'   => $service_key,
-                'name'          => $service->getName(),
-                'type'          => $service->getType(),
-                'host'          => $service->getHost(),
-                'port'          => $service->getPort(),
-                'extra'         => $service->getExtra(),
-            ];
-            $result = Model::D("service_table")->add($service_info);
-        } else {
-            $service_id         = $result['service_id'];
-            $result = true;
-        }
-
-        $response->setId($service_id);
-        $header = $this->getHeader($result ? 200 : 500);
-        $response->setHeader($header);
-        return $response;
+        $request = GrpcTransform::getInstance()->objectToArr($request);
+        $data    = \app\controller\Node::getInstance()->Online($request);
+        $tree    = [
+            'header' => '\Service\Message\ResponseHeader',
+        ];
+        return GrpcTransform::getInstance()->arrToObject(OnlineResponse::class, $data, $tree);
     }
 
     public function Offline(OfflineRequest $request)
     {
-        $response = new OfflineResponse();
-        $service_id = $request->getId();
-
-
-
-        $result = yield MySQLStatement::prepare()
-            ->update("service_table", [
-                'status'    => Constants::SERVICE_OFFLINE
-            ], [
-                'service_id' => $service_id
-            ])
-            ->query($this->mysql_pool->pop());
-
-        if($result['code'] != Error::SUCCESS)
-        {
-            $status = 500;
-            $error = $result['code'];
-            goto error;
-        }
-
-        $header = $this->getHeader(200);
-        $response->setHeader($header);
-        return $response;
-
-        error:
-        $header = $this->getHeader($status, $error);
-        $response->setHeader($header);
-        return $response;
+        $request = GrpcTransform::getInstance()->objectToArr($request);
+        $data    = \app\controller\Node::getInstance()->Offline($request);
+        $tree    = [
+            'header' => '\Service\Message\ResponseHeader',
+        ];
+        return GrpcTransform::getInstance()->arrToObject(OfflineResponse::class, $data, $tree);
     }
 
     public function Status(StatusRequest $request)
@@ -118,19 +66,19 @@ class Node extends NodeService
         $service_id = $request->getId();
         $status     = $request->getStatus();
 
-        $result = yield MySQLStatement::prepare()
-            ->update("service_status",
-                sprintf("status=%d, last_status=status, update_time=%d",$status, time()),
-                [
-                    'service_id' => $service_id
-                ]
-            )
-            ->query($this->mysql_pool->pop());
-
-        if($result['code'] != Error::SUCCESS)
+        $result = Model::D("service_table")
+            ->where([
+                'service_id' => $service_id
+            ])
+            ->save([
+                'status'        => $status,
+                'last_status'   => 'status',
+                'update_time'   => time()
+            ]);
+        if($result === false)
         {
             $status = 500;
-            $error = $result['code'];
+            $error = Error::ERR_UPDATE_SERVICE_FAILED;
             goto error;
         }
 

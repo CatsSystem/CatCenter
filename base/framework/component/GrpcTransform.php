@@ -1,19 +1,28 @@
 <?php
+/*******************************************************************************
+ *  This file is part of CatCenter.
+ *
+ *  CatCenter is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  CatCenter is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************
+ * Author: Lidanyang  <simonarthur2012@gmail.com>
+ ******************************************************************************/
 
-namespace base\framework\component;
-use Google\Protobuf\Internal\MapField;
-use Google\Protobuf\Internal\RepeatedField;
+namespace Utils;
 
-/**
- * Created by PhpStorm.
- * User: skj
- * Date: 2017/6/19
- * Time: 上午11:38
- */
-class ArrayTransform {
-	private static $instance  = NULL;
-	private        $namespace = '';
-	private        $tree      = [];
+class GrpcTransform {
+	private static $instance = NULL;
+	private        $tree     = [];
 
 	public static function getInstance() {
 		if (!self::$instance) {
@@ -45,13 +54,13 @@ class ArrayTransform {
 
 		foreach ($array as $key => $item) {
 			if (is_object($item)) {
-				if($item instanceof RepeatedField || $item instanceof MapField){
+				if ($item instanceof \Google\Protobuf\Internal\RepeatedField || $item instanceof \Google\Protobuf\Internal\MapField) {
 					$tmp = [];
-					foreach ($item as $k=>$v){
+					foreach ($item as $k => $v) {
 						$tmp[$k] = $v;
 					}
 					$array[$key] = $tmp;
-				}else{
+				} else {
 					$array[$key] = $this->objectToArr($item);
 				}
 			}
@@ -65,33 +74,33 @@ class ArrayTransform {
 	/**
 	 * 数组转对象
 	 * @param        $objectClass
-	 * @param string $namespace
 	 * @param array  $array
 	 * @param array  $tree
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	public function arrToObject($namespace, $objectClass, array $array, $tree = []) {
-		$this->tree      = $tree;
-		$this->namespace = $namespace;
-		$responseClass   = $this->namespace . '\\' . $objectClass;
-		$response        = new $responseClass();
+	public function arrToObject($objectClass, array $array, $tree = []) {
+		$this->tree = $tree;
+		$response   = new $objectClass();
 		foreach ($array as $k => $item) {
 			if (is_numeric($k)) {
 				throw new \Exception('error array type');
 			}
 			$func = 'set' . ucwords($k);
 			if (method_exists($response, $func)) {
-				$response->$func($this->getToObjectItem($item, $k));
+				$val = $this->getToObjectItem($item, $k);
+				if (is_array($val) && empty($val)) {
+					continue;
+				}
+				$response->$func($val);
 			}
 		}
-		$this->tree      = [];
-		$this->namespace = '';
+		$this->tree = [];
 		return $response;
 	}
 
 	private function getToObjectItem($item, $keyName = '') {
-		if (is_array($item)) {
+		if (is_array($item) && $item) {
 			$isArr = FALSE;
 			foreach ($item as $k => $value) {
 				if (is_numeric($k)) {
@@ -99,7 +108,7 @@ class ArrayTransform {
 				}
 				break;
 			}
-			if($isArr){
+			if ($isArr || !isset($this->tree[$keyName])) {
 				foreach ($item as $k => $value) {
 					if (is_array($value)) {
 						$item[$k] = $this->getToObjectItem($value, $keyName);
@@ -107,15 +116,16 @@ class ArrayTransform {
 				}
 				return $item;
 			}
-			if (!isset($this->tree[$keyName])) {
-				throw new \Exception("not found [$keyName] class map");
-			}
-			$className = $this->namespace . '\\' . $this->tree[$keyName];
+			$className = $this->tree[$keyName];
 			$object    = new $className();
 			foreach ($item as $k => $value) {
 				$func = 'set' . ucwords($k);
 				if (method_exists($object, $func)) {
-					$object->$func($this->getToObjectItem($value, $keyName . '.' . $k));
+					$val = $this->getToObjectItem($value, $keyName . '.' . $k);
+					if (is_array($val) && empty($val)) {
+						continue;
+					}
+					$object->$func($val);
 				}
 			}
 			return $object;

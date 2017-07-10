@@ -3,7 +3,7 @@
 
 namespace Proto\Service {
 
-  class NodeClient extends \Grpc\BaseStub {
+  class NodeClient extends \rpc\grpc\BaseStub {
 
     /**
      * @param string $hostname hostname

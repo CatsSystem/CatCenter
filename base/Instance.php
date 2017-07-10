@@ -17,15 +17,22 @@
  *******************************************************************************
  * Author: Lidanyang  <simonarthur2012@gmail.com>
  ******************************************************************************/
+ 
+namespace base\framework;
 
-namespace app\common;
-
-class Error extends \core\common\Error
+trait Instance
 {
-    const ERR_ETCD_REQUEST_FAILED = -1001;
-    const ERR_HTTP_REQUEST_FAILED = -2001;
-
-    const ERR_UPDATE_SERVICE_FAILED = -10001;
-
-
+    private static $instance = null;
+    
+    /**
+     * @return self
+     */
+    public static function getInstance()
+    {
+        if(self::$instance == null)
+        {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
 }
